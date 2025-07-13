@@ -23,3 +23,41 @@ Facilitar a vida do contribuinte e do contador, trazendo agilidade, segurança e
 ```bash
 git clone https://github.com/seuusuario/irbot.git
 cd irbot
+git clone https://github.com/seuusuario/irbot.git
+cd irbot
+
+codigo
+from fastapi import APIRouter
+from app.services.whatsapp_service import send_whatsapp_message
+from app.services.ai_service import ask_ai
+from app.services.pdf_service import generate_pdf
+from app.services.aceite_service import gerar_hash_digital
+import uuid
+
+router = APIRouter()
+
+@router.post("/processar-ir/")
+def processar_ir(nome: str, cpf: str, rendimentos: float, deducoes: float, whatsapp: str):
+    dados = {
+        "nome": nome,
+        "cpf": cpf,
+        "rendimentos": rendimentos,
+        "deducoes": deducoes
+    }
+
+    # 1. Gerar PDF
+    pdf_path = f"/tmp/{uuid.uuid4()}.pdf"
+    generate_pdf(dados, pdf_path)
+
+    # 2. Gerar mensagem e hash
+    hash_aceite = gerar_hash_digital(cpf, str(dados))
+    mensagem = f"""
+Olá {nome}, sua declaração de IR está pronta.
+Para autorizar o envio, clique aqui: https://seusite.com/aceitar/{hash_aceite}
+(ou envie esse código: {hash_aceite})
+"""
+
+    # 3. Enviar via WhatsApp
+    send_whatsapp_message(whatsapp, mensagem)
+
+    return {"status": "Declaração gerada e enviada para aceite no WhatsApp"}
