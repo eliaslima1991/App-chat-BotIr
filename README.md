@@ -61,3 +61,28 @@ Para autorizar o envio, clique aqui: https://seusite.com/aceitar/{hash_aceite}
     send_whatsapp_message(whatsapp, mensagem)
 
     return {"status": "Declaração gerada e enviada para aceite no WhatsApp"}
+
+
+1️⃣ Integração com WhatsApp (usando Twilio)
+
+📁 app/services/whatsapp_service.py
+
+from twilio.rest import Client
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")  # exemplo: 'whatsapp:+14155238886'
+
+client = Client(TWILIO_SID, TWILIO_AUTH)
+
+def send_whatsapp_message(to: str, message: str):
+    message = client.messages.create(
+        from_=TWILIO_NUMBER,
+        body=message,
+        to=f'whatsapp:{to}'
+    )
+    return message.sid
