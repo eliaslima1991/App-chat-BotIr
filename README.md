@@ -86,3 +86,41 @@ def send_whatsapp_message(to: str, message: str):
         to=f'whatsapp:{to}'
     )
     return message.sid
+
+2️⃣ Conversa com IA (OpenAI ou outro modelo)
+
+📁 app/services/ai_service.py
+
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def ask_ai(prompt: str) -> str:
+    response = openai.ChatCompletion.create(
+        model="gpt-4",  # ou gpt-3.5-turbo se preferir
+        messages=[
+            {"role": "system", "content": "Você é um assistente para preenchimento de imposto de renda."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response['choices'][0]['message']['content']
+
+3️⃣ Geração de PDF (usando Jinja2 e WeasyPrint)
+
+📁 app/services/pdf_service.py
+
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+import os
+
+TEMPLATE_DIR = os.path.abspath("app/templates")
+
+def generate_pdf(data: dict, output_path: str):
+    env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
+    template = env.get_template("declaracao.html")
+
+    html_out = template.render(data=data)
+    HTML(string=html_out).write_pdf(output_path)
